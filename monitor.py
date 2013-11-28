@@ -4,8 +4,6 @@ import mailutils
 
 global Process,m_vars
 
-def check_monitor_proc():
-    pass
 
 def send_mail():
     mailutils.compose_email_body()
@@ -21,9 +19,40 @@ def start_monitor_proc(pid):
 def check_monitor_proc(m_vars):
 
     global Process
-    if():
-        return True
-    return False
+
+    ret = dict()
+    for key in m_vars.MonitorValsCount.keys():
+
+        proc_obj_elem = 'Process.'+key   #Process object member funcs/vars
+        if callable(proc_obj_elem):
+            val = apply(proc_obj_elem)
+            #Damn it sometimes this module returns a custom obj. would have been easier if it's always number
+            #Now i have to handle individual cases, more code.. duh.. probs of OOPS design.
+
+            #if isinstance(val,psutil._common.cputimes):
+            #    for each in m_vars.get(key):
+            #        if val.user > each.get(user):
+            #            ret.append( True)
+            #    if val > m_vars.get(key).get(
+            if isinstance(val,(int,float)):
+
+                if val > m_vars.MonitorValsCount.get(key):
+                    ret.update({key: True})
+                else:
+                    ret.update({key,False})
+            if isinstance(val,str,list):
+                if val != m_vars.MonitorValsCount.get(key):
+                    ret.update({key:True})
+                else:
+                    ret.update({key:False})
+            #Duh.. still so many conditions, there ought to be a better way.
+
+        elif proc_obj_elem > m_vars.MonitorValsCount.get(key):
+            ret.update({key:True})
+        else:
+            ret.update({key:False})
+    return ret
+
 
 def main(environ):
     #global m_vars
@@ -35,8 +64,9 @@ def main(environ):
     start_monitor_proc(m_vars.Pid)
 
 
-    if check_monitor_proc():
-        send_mail()
+    ret_dict = check_monitor_proc(m_vars)
+    if False in ret_dict.values():
+        send_mail(ret_dict)
 
 if __name__ == '__main__':
     OP = optparse.OptionParser()
