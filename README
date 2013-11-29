@@ -1,5 +1,0 @@
-A simple script to monitor a processes' statistics and mail if they exceed specific values.
-
-It uses psutils python package, which in turn relies on the /proc filesystem drivers.
-So all variables enabled by that are possible.
-
